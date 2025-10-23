@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gaodun.learningservice.mapper.UserLearningProfilesMapper">
+    
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.gaodun.learningservice.Entity.UserLearningProfilesEntity">
+        <id column="profile_id" property="profileId" jdbcType="INTEGER"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="course_id" property="courseId" jdbcType="INTEGER"/>
+        <result column="mastery_level" property="masteryLevel" jdbcType="VARCHAR"/>
+        <result column="preferred_style" property="preferredStyle" jdbcType="VARCHAR"/>
+        <result column="last_updated" property="lastUpdated" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <!-- 根据profile_id查询 -->
+    <select id="selectById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_profiles WHERE profile_id = #{profileId}
+    </select>
+    
+    <!-- 根据用户ID查询（user_id有唯一约束，返回单个对象） -->
+    <select id="selectByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_profiles WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 查询所有 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_profiles
+    </select>
+    
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.gaodun.learningservice.Entity.UserLearningProfilesEntity" useGeneratedKeys="true" keyProperty="profileId">
+        INSERT INTO user_learning_profiles (
+            user_id, course_id, mastery_level, preferred_style, last_updated
+        ) VALUES (
+            #{userId}, #{courseId}, #{masteryLevel}, #{preferredStyle}, #{lastUpdated}
+        )
+    </insert>
+    
+    <!-- 更新 -->
+    <update id="update" parameterType="com.gaodun.learningservice.Entity.UserLearningProfilesEntity">
+        UPDATE user_learning_profiles
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="masteryLevel != null">mastery_level = #{masteryLevel},</if>
+            <if test="preferredStyle != null">preferred_style = #{preferredStyle},</if>
+            <if test="lastUpdated != null">last_updated = #{lastUpdated}</if>
+        </set>
+        WHERE profile_id = #{profileId}
+    </update>
+    
+    <!-- 删除 -->
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM user_learning_profiles WHERE profile_id = #{profileId}
+    </delete>
+    
+    <!-- 根据用户ID删除 -->
+    <delete id="deleteByUserId" parameterType="java.lang.Integer">
+        DELETE FROM user_learning_profiles WHERE user_id = #{userId}
+    </delete>
+    
+</mapper>

@@ -17,11 +17,14 @@ public interface UserLearningRecordsMapper {
     // 根据用户ID查询学习记录
     List<UserLearningRecordsEntity> selectByUserId(Integer userId);
     
-    // 根据课程ID查询学习记录
-    List<UserLearningRecordsEntity> selectByCourseId(Integer courseId);
-    
     // 根据题目ID查询学习记录
     List<UserLearningRecordsEntity> selectByQuestionId(Integer questionId);
+    
+    // 根据答题记录ID查询学习记录
+    List<UserLearningRecordsEntity> selectByAnswerId(Integer answerId);
+    
+    // 根据用户ID和知识点ID查询前10条学习记录
+    List<UserLearningRecordsEntity> selectTop10ByUserIdAndPointId(Integer userId, Integer pointId);
     
     // 查询所有学习记录
     List<UserLearningRecordsEntity> selectAll();

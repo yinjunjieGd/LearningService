@@ -29,6 +29,11 @@
         WHERE question_id = #{questionId}
     </select>
     
+    <!-- 根据题目ID查询知识点ID -->
+    <select id="selectPointIdByQuestionId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        SELECT point_id FROM questions WHERE question_id = #{questionId}
+    </select>
+    
     <!-- 查询所有题目 -->
     <select id="selectAll" resultMap="BaseResultMap">
         SELECT 

@@ -2,41 +2,41 @@ package com.gaodun.learningservice.Entity;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.Map;
 
 /**
- * 用户学习档案实体类
+ * 用户学习画像实体类
  * @author shkstart
  */
 @Data
 @Entity
 @Table(name = "user_learning_profiles")
 public class UserLearningProfilesEntity {
+    
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "profile_id")
     private Integer profileId;
     
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false, unique = true)
     private Integer userId;
     
-    @Column(name = "course_id")
+    @Column(name = "course_id", nullable = false)
     private Integer courseId;
     
-    @Column(name = "current_progress")
-    private Double currentProgress;
+    /**
+     * 知识点掌握度(JSON格式)
+     * 格式: {"知识点id": {"score": 0.85, "comment": "掌握良好"}, ...}
+     */
+    @Column(name = "mastery_level", columnDefinition = "text")
+    private String masteryLevel;
     
-    @Column(name = "last_study_time")
-    private java.util.Date lastStudyTime;
+    @Column(name = "preferred_style", length = 50)
+    private String preferredStyle;
     
-    @Column(name = "total_study_duration")
-    private Integer totalStudyDuration;
-    
-    @Column(name = "completion_status")
-    private String completionStatus;
-    
-    @Column(name = "test_score")
-    private Integer testScore;
+    @Column(name = "last_updated")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdated;
 }

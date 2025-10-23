@@ -36,12 +36,6 @@ public class UserLearningRecordsController {
     }
     
     // 根据课程ID查询学习记录
-    @GetMapping("/listByCourseId")
-    public List<UserLearningRecordsEntity> listByCourseId(@RequestParam Integer courseId) {
-        log.info("Received request to list user learning records by course id: {}", courseId);
-        return userLearningRecordsManager.selectByCourseId(courseId);
-    }
-    
     // 根据题目ID查询学习记录
     @GetMapping("/listByQuestionId")
     public List<UserLearningRecordsEntity> listByQuestionId(@RequestParam Integer questionId) {

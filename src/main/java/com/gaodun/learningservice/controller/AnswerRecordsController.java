@@ -2,7 +2,7 @@ package com.gaodun.learningservice.controller;
 
 import com.gaodun.learningservice.Entity.AnswerRecordsEntity;
 import com.gaodun.learningservice.manager.AnswerRecordsManager;
-import lombok.RequiredArgsConstructor;
+import com.gaodun.learningservice.service.AnswerRecordAsyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +15,13 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/answer-records")
-@RequiredArgsConstructor
 @Slf4j
 public class AnswerRecordsController {
     @Autowired
     private AnswerRecordsManager answerRecordsManager;
+    
+    @Autowired
+    private AnswerRecordAsyncService answerRecordAsyncService;
     
     // 根据ID查询答题记录
     @GetMapping("/getById")
@@ -67,7 +69,15 @@ public class AnswerRecordsController {
     @PutMapping("/update")
     public int update(@RequestBody AnswerRecordsEntity record) {
         log.info("Received request to update answer record: {}", record);
-        return answerRecordsManager.update(record);
+        int result = answerRecordsManager.update(record);
+        
+        // 如果更新成功，触发异步任务
+        if (result > 0) {
+            log.info("Answer record updated successfully, triggering async task for record: {}", record.getRecordId());
+            answerRecordAsyncService.processAnswerRecordUpdate(record.getRecordId());
+        }
+        
+        return result;
     }
     
     // 删除答题记录

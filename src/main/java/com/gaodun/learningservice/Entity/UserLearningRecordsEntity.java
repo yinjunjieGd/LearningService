@@ -25,8 +25,8 @@ public class UserLearningRecordsEntity {
     @Column(name = "question_id")
     private Integer questionId;
     
-    @Column(name = "course_id")
-    private Integer courseId;
+    @Column(name = "answer_id")
+    private Integer answerId;
     
     @Column(name = "user_answer")
     private String userAnswer;
@@ -34,9 +34,9 @@ public class UserLearningRecordsEntity {
     @Column(name = "is_correct")
     private Boolean isCorrect;
     
-    @Column(name = "answer_time")
-    private java.util.Date answerTime;
+    @Column(name = "answered_at")
+    private java.util.Date answeredAt;
     
-    @Column(name = "spend_time")
-    private Integer spendTime;
+    @Column(name = "time_spent")
+    private Integer timeSpent;
 }

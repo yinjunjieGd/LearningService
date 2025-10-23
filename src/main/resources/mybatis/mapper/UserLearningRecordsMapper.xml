@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gaodun.learningservice.mapper.UserLearningRecordsMapper">
+    
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.gaodun.learningservice.Entity.UserLearningRecordsEntity">
+        <id column="record_id" property="recordId" jdbcType="INTEGER"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="question_id" property="questionId" jdbcType="INTEGER"/>
+        <result column="answer_id" property="answerId" jdbcType="INTEGER"/>
+        <result column="user_answer" property="userAnswer" jdbcType="VARCHAR"/>
+        <result column="is_correct" property="isCorrect" jdbcType="BOOLEAN"/>
+        <result column="answered_at" property="answeredAt" jdbcType="TIMESTAMP"/>
+        <result column="time_spent" property="timeSpent" jdbcType="INTEGER"/>
+    </resultMap>
+    
+    <!-- 根据ID查询 -->
+    <select id="selectById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_records WHERE record_id = #{recordId}
+    </select>
+    
+    <!-- 根据用户ID查询 -->
+    <select id="selectByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_records WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 根据题目ID查询 -->
+    <select id="selectByQuestionId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_records WHERE question_id = #{questionId}
+    </select>
+    
+    <!-- 根据答题记录ID查询 -->
+    <select id="selectByAnswerId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_records WHERE answer_id = #{answerId}
+    </select>
+    
+    <!-- 根据用户ID和知识点ID查询前10条学习记录 -->
+    <select id="selectTop10ByUserIdAndPointId" resultMap="BaseResultMap">
+        SELECT ulr.* 
+        FROM user_learning_records ulr
+        INNER JOIN questions q ON ulr.question_id = q.question_id
+        WHERE ulr.user_id = #{userId} AND q.point_id = #{pointId}
+        ORDER BY ulr.answered_at DESC
+        LIMIT 10
+    </select>
+    
+    <!-- 查询所有 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_records
+    </select>
+    
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.gaodun.learningservice.Entity.UserLearningRecordsEntity" useGeneratedKeys="true" keyProperty="recordId">
+        INSERT INTO user_learning_records (
+            user_id, question_id, answer_id, user_answer, 
+            is_correct, answered_at, time_spent
+        ) VALUES (
+            #{userId}, #{questionId}, #{answerId}, #{userAnswer}, 
+            #{isCorrect}, #{answeredAt}, #{timeSpent}
+        )
+    </insert>
+    
+    <!-- 更新 -->
+    <update id="update" parameterType="com.gaodun.learningservice.Entity.UserLearningRecordsEntity">
+        UPDATE user_learning_records
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="questionId != null">question_id = #{questionId},</if>
+            <if test="answerId != null">answer_id = #{answerId},</if>
+            <if test="userAnswer != null">user_answer = #{userAnswer},</if>
+            <if test="isCorrect != null">is_correct = #{isCorrect},</if>
+            <if test="answeredAt != null">answered_at = #{answeredAt},</if>
+            <if test="timeSpent != null">time_spent = #{timeSpent}</if>
+        </set>
+        WHERE record_id = #{recordId}
+    </update>
+    
+    <!-- 删除 -->
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM user_learning_records WHERE record_id = #{recordId}
+    </delete>
+    
+</mapper>

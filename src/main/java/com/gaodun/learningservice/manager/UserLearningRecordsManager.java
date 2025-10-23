@@ -15,9 +15,6 @@ public interface UserLearningRecordsManager {
     // 根据用户ID查询学习记录
     List<UserLearningRecordsEntity> selectByUserId(Integer userId);
     
-    // 根据课程ID查询学习记录
-    List<UserLearningRecordsEntity> selectByCourseId(Integer courseId);
-    
     // 根据题目ID查询学习记录
     List<UserLearningRecordsEntity> selectByQuestionId(Integer questionId);
     

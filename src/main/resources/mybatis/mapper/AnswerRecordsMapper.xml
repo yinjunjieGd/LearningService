@@ -76,15 +76,16 @@
     <!-- 更新答题记录 -->
     <update id="update" parameterType="com.gaodun.learningservice.Entity.AnswerRecordsEntity">
         UPDATE answer_records
-        SET
-        exam_name = #{examName},
-        user_id = #{userId},
-        start_time = #{startTime},
-        end_time = #{endTime},
-        time_spent = #{timeSpent},
-        status = #{status},
-        score = #{score},
-        updated_at = #{updatedAt}
+        <set>
+            <if test="examName != null">exam_name = #{examName},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="timeSpent != null">time_spent = #{timeSpent},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
         WHERE record_id = #{recordId}
     </update>
     

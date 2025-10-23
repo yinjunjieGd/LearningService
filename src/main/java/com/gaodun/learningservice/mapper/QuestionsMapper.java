@@ -16,6 +16,9 @@ public interface QuestionsMapper {
     // 根据ID查询题目
     QuestionsEntity selectById(Integer questionId);
     
+    // 根据题目ID查询知识点ID
+    Integer selectPointIdByQuestionId(Integer questionId);
+    
     // 查询所有题目
     List<QuestionsEntity> selectAll();
     

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 用户学习档案Manager实现类
+ * 用户学习画像Manager实现类
  * @author shkstart
  */
 @Slf4j
@@ -26,15 +26,9 @@ public class UserLearningProfilesImpl implements UserLearningProfilesManager {
     }
     
     @Override
-    public List<UserLearningProfilesEntity> selectByUserId(Integer userId) {
+    public UserLearningProfilesEntity selectByUserId(Integer userId) {
         log.info("selectByUserId: {}", userId);
         return userLearningProfilesMapper.selectByUserId(userId);
-    }
-    
-    @Override
-    public UserLearningProfilesEntity selectByUserIdAndCourseId(Integer userId, Integer courseId) {
-        log.info("selectByUserIdAndCourseId: userId={}, courseId={}", userId, courseId);
-        return userLearningProfilesMapper.selectByUserIdAndCourseId(userId, courseId);
     }
     
     @Override
@@ -59,5 +53,11 @@ public class UserLearningProfilesImpl implements UserLearningProfilesManager {
     public int delete(Integer profileId) {
         log.info("delete: {}", profileId);
         return userLearningProfilesMapper.delete(profileId);
+    }
+    
+    @Override
+    public int deleteByUserId(Integer userId) {
+        log.info("deleteByUserId: {}", userId);
+        return userLearningProfilesMapper.deleteByUserId(userId);
     }
 }

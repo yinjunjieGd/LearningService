@@ -32,12 +32,6 @@ public class UserLearningRecordsImpl implements UserLearningRecordsManager {
     }
     
     @Override
-    public List<UserLearningRecordsEntity> selectByCourseId(Integer courseId) {
-        log.info("selectByCourseId: {}", courseId);
-        return userLearningRecordsMapper.selectByCourseId(courseId);
-    }
-    
-    @Override
     public List<UserLearningRecordsEntity> selectByQuestionId(Integer questionId) {
         log.info("selectByQuestionId: {}", questionId);
         return userLearningRecordsMapper.selectByQuestionId(questionId);
