@@ -16,6 +16,33 @@
         WHERE course_id = #{id}
     </select>
 
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT *
+        FROM courses
+    </select>
 
+    <select id="selectByTeacherId" parameterType="Integer" resultMap="BaseResultMap">
+        SELECT *
+        FROM courses
+        WHERE teacher_id = #{teacherId}
+    </select>
 
+    <insert id="insert" parameterType="com.gaodun.learningservice.Entity.CoursesEntity">
+        INSERT INTO courses (teacher_id, title, description, create_time, update_time)
+        VALUES (#{teacherId}, #{title}, #{description}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.gaodun.learningservice.Entity.CoursesEntity">
+        UPDATE courses
+        SET teacher_id = #{teacherId},
+            title = #{title},
+            description = #{description},
+            update_time = NOW()
+        WHERE course_id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Integer">
+        DELETE FROM courses
+        WHERE course_id = #{id}
+    </delete>
 </mapper>

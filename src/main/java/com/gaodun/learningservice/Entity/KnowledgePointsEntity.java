@@ -7,21 +7,21 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
+ * 知识点实体类
  * @author shkstart
- * @create 2025-10-22 23:58
+ * @create 2025-10-23 2:30
  */
 @Data
 @Entity
-@Table(name = "courses")
-public class CoursesEntity{
+@Table(name = "knowledge_points")
+public class KnowledgePointsEntity {
     @Id
-    @Column(name = "course_id")
-    private Integer id;
+    @Column(name = "point_id")
+    private Integer pointId;
     
-    @Column(name = "teacher_id")
-    private Integer teacherId;
+    @Column(name = "course_id")
+    private Integer courseId;
     
     @Column(name = "title")
     private String title;
@@ -29,10 +29,6 @@ public class CoursesEntity{
     @Column(name = "description")
     private String description;
     
-    @Column(name = "subject")
-    private String subject;
-    
-    @Column(name = "difficulty")
-    private String difficulty;
-
+    @Column(name = "prerequisite_id")
+    private Integer prerequisiteId;
 }

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gaodun.learningservice.mapper.QuestionsMapper">
+    
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.gaodun.learningservice.Entity.QuestionsEntity">
+        <id column="question_id" property="questionId" jdbcType="INTEGER"/>
+        <result column="point_id" property="pointId" jdbcType="INTEGER"/>
+        <result column="stem" property="stem" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="options" property="options" jdbcType="VARCHAR"/>
+        <result column="correct_answer" property="correctAnswer" jdbcType="VARCHAR"/>
+        <result column="ai_analysis" property="aiAnalysis" jdbcType="VARCHAR"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <!-- 所有字段的SQL片段 -->
+    <sql id="Base_Column_List">
+        question_id, point_id, stem, type, options, correct_answer, ai_analysis, created_at
+    </sql>
+    
+    <!-- 根据ID查询题目 -->
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM questions
+        WHERE question_id = #{questionId}
+    </select>
+    
+    <!-- 查询所有题目 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM questions
+    </select>
+    
+    <!-- 根据知识点ID查询题目 -->
+    <select id="selectByPointId" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM questions
+        WHERE point_id = #{pointId}
+    </select>
+    
+    <!-- 根据题目类型查询题目 -->
+    <select id="selectByType" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM questions
+        WHERE type = #{type}
+    </select>
+    
+    <!-- 插入题目 -->
+    <insert id="insert" parameterType="com.gaodun.learningservice.Entity.QuestionsEntity">
+        INSERT INTO questions
+        (question_id, point_id, stem, type, options, correct_answer, ai_analysis, created_at)
+        VALUES
+        (#{questionId}, #{pointId}, #{stem}, #{type}, #{options}, #{correctAnswer}, #{aiAnalysis}, #{createdAt})
+    </insert>
+    
+    <!-- 更新题目 -->
+    <update id="update" parameterType="com.gaodun.learningservice.Entity.QuestionsEntity">
+        UPDATE questions
+        SET
+        point_id = #{pointId},
+        stem = #{stem},
+        type = #{type},
+        options = #{options},
+        correct_answer = #{correctAnswer},
+        ai_analysis = #{aiAnalysis},
+        created_at = #{createdAt}
+        WHERE question_id = #{questionId}
+    </update>
+    
+    <!-- 删除题目 -->
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM questions
+        WHERE question_id = #{questionId}
+    </delete>
+    
+    <!-- 根据知识点ID列表查询题目 -->
+    <select id="selectByPointIds" resultMap="BaseResultMap">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM questions
+        WHERE point_id IN
+        <foreach item="pointId" collection="pointIds" open="(" separator="," close=")">
+            #{pointId}
+        </foreach>
+    </select>
+    
+    <!-- 查询指定知识点的题目数量 -->
+    <select id="countByPointId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM questions
+        WHERE point_id = #{pointId}
+    </select>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gaodun.learningservice.mapper.KnowledgePointsMapper">
+    
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.gaodun.learningservice.Entity.KnowledgePointsEntity">
+        <id column="point_id" property="pointId" jdbcType="INTEGER"/>
+        <result column="course_id" property="courseId" jdbcType="INTEGER"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="prerequisite_id" property="prerequisiteId" jdbcType="INTEGER"/>
+    </resultMap>
+    
+    <!-- 所有字段的SQL片段 -->
+    <sql id="Base_Column_List">
+        point_id, course_id, title, description, prerequisite_id
+    </sql>
+    
+    <!-- 根据ID查询知识点 -->
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM knowledge_points
+        WHERE point_id = #{pointId}
+    </select>
+    
+    <!-- 查询所有知识点 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM knowledge_points
+    </select>
+    
+    <!-- 根据课程ID查询知识点 -->
+    <select id="selectByCourseId" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM knowledge_points
+        WHERE course_id = #{courseId}
+    </select>
+    
+    <!-- 插入知识点 -->
+    <insert id="insert" parameterType="com.gaodun.learningservice.Entity.KnowledgePointsEntity" useGeneratedKeys="true" keyProperty="pointId">
+        INSERT INTO knowledge_points
+        (course_id, title, description, prerequisite_id)
+        VALUES
+        (#{courseId}, #{title}, #{description}, #{prerequisiteId})
+    </insert>
+    
+    <!-- 更新知识点 -->
+    <update id="update" parameterType="com.gaodun.learningservice.Entity.KnowledgePointsEntity">
+        UPDATE knowledge_points
+        SET
+        course_id = #{courseId},
+        title = #{title},
+        description = #{description},
+        prerequisite_id = #{prerequisiteId}
+        WHERE point_id = #{pointId}
+    </update>
+    
+    <!-- 删除知识点 -->
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM knowledge_points
+        WHERE point_id = #{pointId}
+    </delete>
+</mapper>
