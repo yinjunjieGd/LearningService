@@ -17,6 +17,9 @@ public interface UserLearningProfilesMapper {
     // 根据用户ID查询学习画像（user_id有唯一约束，返回单个对象）
     UserLearningProfilesEntity selectByUserId(Integer userId);
     
+    // 根据用户ID和课程ID查询学习画像
+    UserLearningProfilesEntity selectByUserIdAndCourseId(Integer userId, Integer courseId);
+    
     // 查询所有学习画像
     List<UserLearningProfilesEntity> selectAll();
     

@@ -22,6 +22,12 @@
         SELECT * FROM user_learning_profiles WHERE user_id = #{userId}
     </select>
     
+    <!-- 根据用户ID和课程ID查询 -->
+    <select id="selectByUserIdAndCourseId" resultMap="BaseResultMap">
+        SELECT * FROM user_learning_profiles 
+        WHERE user_id = #{userId} AND course_id = #{courseId}
+    </select>
+    
     <!-- 查询所有 -->
     <select id="selectAll" resultMap="BaseResultMap">
         SELECT * FROM user_learning_profiles

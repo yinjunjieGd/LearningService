@@ -364,12 +364,11 @@ public class AnswerRecordAsyncService {
             // 将掌握度数据转换为JSON字符串
             String masteryLevelJson = objectMapper.writeValueAsString(masteryData);
             
-            // 查询是否已存在该用户的学习画像
-            UserLearningProfilesEntity existingProfile = userLearningProfilesMapper.selectByUserId(userId);
+            // 根据用户ID和课程ID查询是否已存在该学习画像
+            UserLearningProfilesEntity existingProfile = userLearningProfilesMapper.selectByUserIdAndCourseId(userId, courseId);
             
             if (existingProfile != null) {
-                // 更新现有记录
-                existingProfile.setCourseId(courseId);
+                // 更新现有记录的masteryLevel和lastUpdated字段
                 existingProfile.setMasteryLevel(masteryLevelJson);
                 existingProfile.setLastUpdated(new java.sql.Timestamp(System.currentTimeMillis()));
                 
