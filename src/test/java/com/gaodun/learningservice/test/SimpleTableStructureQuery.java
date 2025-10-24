@@ -23,6 +23,7 @@ public class SimpleTableStructureQuery {
             queryTableStructure("user_learning_profiles");
             queryTableStructure("user_learning_records");
             queryTableStructure("users");
+            queryTableStructure("study_plan");
         } catch (Exception e) {
             e.printStackTrace();
         }

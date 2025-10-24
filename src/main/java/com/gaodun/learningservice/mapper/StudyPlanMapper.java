@@ -24,7 +24,7 @@ public interface StudyPlanMapper {
      */
     StudyPlanEntity selectByUserIdAndCourseIdAndKnowledgePoint(@Param("userId") Integer userId,
                                                                 @Param("courseId") Integer courseId,
-                                                                @Param("knowledgePoint") String knowledgePoint);
+                                                                @Param("knowledgePoint") Integer knowledgePoint);
     
     /**
      * 插入学习计划

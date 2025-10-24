@@ -133,20 +133,17 @@ public class StudyPlanManagerImpl implements StudyPlanManager {
         
         prompt.append("\n【任务要求】\n");
         prompt.append("请基于上述信息，为每个知识点生成学习计划，要求：\n");
-        prompt.append("1. 优先级(priority): 1-10，数字越大优先级越高\n");
-        prompt.append("2. 预计学习时间(estimated_time): 单位为分钟\n");
-        prompt.append("3. 难度等级(difficulty_level): easy/medium/hard\n");
-        prompt.append("4. 学习顺序(learning_order): 从1开始的连续整数\n");
-        prompt.append("5. AI分析(ai_comment): 对该知识点的学习建议，考虑权重和掌握度\n\n");
-        
+        prompt.append("1. 学习时长(study_duration): 单位为小时，保留2位小数\n");
+        prompt.append("2. 学习顺序(learning_order): 从1开始的连续整数\n");
+        prompt.append("3. AI分析(ai_comment): 对该知识点的学习建议，考虑权重和掌握度\n\n");
+        prompt.append("注意：请根据知识点重要性和难度合理设置学习时长。\n\n");
+
         prompt.append("【输出格式】\n");
         prompt.append("请严格按照以下JSON格式输出，不要添加任何markdown标记或其他说明文字：\n");
         prompt.append("[\n");
         prompt.append("  {\n");
-        prompt.append("    \"knowledge_point\": \"知识点名称\",\n");
-        prompt.append("    \"priority\": 优先级数字,\n");
-        prompt.append("    \"estimated_time\": 预计时间数字,\n");
-        prompt.append("    \"difficulty_level\": \"难度等级\",\n");
+        prompt.append("    \"knowledge_point\": 知识点ID数字,\n");
+        prompt.append("    \"study_duration\": 学习时长长小数,\n");
         prompt.append("    \"learning_order\": 学习顺序数字,\n");
         prompt.append("    \"ai_comment\": \"AI分析建议\"\n");
         prompt.append("  }\n");
@@ -204,10 +201,37 @@ public class StudyPlanManagerImpl implements StudyPlanManager {
                 StudyPlanEntity plan = new StudyPlanEntity();
                 plan.setUserId(userId);
                 plan.setCourseId(courseId);
-                plan.setKnowledgePoint((String) planMap.get("knowledge_point"));
-                plan.setPriority(((Number) planMap.get("priority")).intValue());
-                plan.setEstimatedTime(((Number) planMap.get("estimated_time")).intValue());
-                plan.setDifficultyLevel((String) planMap.get("difficulty_level"));
+                
+                // 处理knowledge_point字段 - 如果是字符串尝试转换为整数
+                Object knowledgePointObj = planMap.get("knowledge_point");
+                if (knowledgePointObj instanceof String) {
+                    try {
+                        plan.setKnowledgePoint(Integer.parseInt((String) knowledgePointObj));
+                    } catch (NumberFormatException e) {
+                        // 如果无法转换，记录警告并设置默认值
+                        log.warn("无法将知识点名称 '{}' 转换为ID，使用默认值0", knowledgePointObj);
+                        plan.setKnowledgePoint(0);
+                    }
+                } else if (knowledgePointObj instanceof Number) {
+                    plan.setKnowledgePoint(((Number) knowledgePointObj).intValue());
+                }
+                
+                // 处理study_duration字段 - 支持新格式，同时兼容旧格式
+                if (planMap.containsKey("study_duration")) {
+                    plan.setStudyDuration(((Number) planMap.get("study_duration")).doubleValue());
+                } else if (planMap.containsKey("priority") && planMap.containsKey("estimated_time")) {
+                    // 兼容旧格式：根据优先级和预计时间计算学习时长（小时）
+                    int priority = ((Number) planMap.get("priority")).intValue();
+                    int estimatedTime = ((Number) planMap.get("estimated_time")).intValue();
+                    double studyDuration = (estimatedTime * priority / 10.0) / 60.0;
+                    plan.setStudyDuration(Math.round(studyDuration * 100.0) / 100.0);
+                }
+                
+                // 可选：如果AI仍然返回difficulty_level字段，则记录日志但不设置
+                if (planMap.containsKey("difficulty_level")) {
+                    log.debug("AI返回了difficulty_level字段，但已不再使用: {}", planMap.get("difficulty_level"));
+                }
+                
                 plan.setLearningOrder(((Number) planMap.get("learning_order")).intValue());
                 plan.setAiComment((String) planMap.get("ai_comment"));
                 studyPlans.add(plan);

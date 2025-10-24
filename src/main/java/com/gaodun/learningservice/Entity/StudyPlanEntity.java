@@ -26,17 +26,11 @@ public class StudyPlanEntity {
     @Column(name = "course_id", nullable = false)
     private Integer courseId;
     
-    @Column(name = "knowledge_point", nullable = false, length = 100)
-    private String knowledgePoint;
+    @Column(name = "knowledge_point", nullable = false)
+    private Integer knowledgePoint;
     
-    @Column(name = "priority")
-    private Integer priority;
-    
-    @Column(name = "estimated_time")
-    private Integer estimatedTime;
-    
-    @Column(name = "difficulty_level", length = 20)
-    private String difficultyLevel;
+    @Column(name = "study_duration", nullable = false)
+    private Double studyDuration;
     
     @Column(name = "learning_order")
     private Integer learningOrder;

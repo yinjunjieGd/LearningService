@@ -31,8 +31,7 @@ public class CoursesEntity{
     
     @Column(name = "subject")
     private String subject;
-    
+
     @Column(name = "difficulty")
     private String difficulty;
-
 }

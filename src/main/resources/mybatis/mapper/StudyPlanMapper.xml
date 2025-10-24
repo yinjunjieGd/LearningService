@@ -7,9 +7,8 @@
         <id column="plan_id" property="planId" jdbcType="BIGINT"/>
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="course_id" property="courseId" jdbcType="INTEGER"/>
-        <result column="knowledge_point" property="knowledgePoint" jdbcType="VARCHAR"/>
-        <result column="priority" property="priority" jdbcType="INTEGER"/>
-        <result column="estimated_time" property="estimatedTime" jdbcType="INTEGER"/>
+        <result column="knowledge_point" property="knowledgePoint" jdbcType="INTEGER"/>
+        <result column="study_duration" property="studyDuration" jdbcType="DOUBLE"/>
         <result column="difficulty_level" property="difficultyLevel" jdbcType="VARCHAR"/>
         <result column="learning_order" property="learningOrder" jdbcType="INTEGER"/>
         <result column="ai_comment" property="aiComment" jdbcType="VARCHAR"/>
@@ -37,18 +36,16 @@
     <insert id="insert" parameterType="com.gaodun.learningservice.Entity.StudyPlanEntity"
             useGeneratedKeys="true" keyProperty="planId">
         INSERT INTO study_plan
-            (user_id, course_id, knowledge_point, priority, estimated_time, 
-             difficulty_level, learning_order, ai_comment, created_at, updated_at)
+            (user_id, course_id, knowledge_point, study_duration, 
+             learning_order, ai_comment, created_at, updated_at)
         VALUES
-            (#{userId}, #{courseId}, #{knowledgePoint}, #{priority}, #{estimatedTime},
-             #{difficultyLevel}, #{learningOrder}, #{aiComment}, #{createdAt}, #{updatedAt})
+            (#{userId}, #{courseId}, #{knowledgePoint}, #{studyDuration},
+             #{learningOrder}, #{aiComment}, #{createdAt}, #{updatedAt})
     </insert>
 
     <update id="update" parameterType="com.gaodun.learningservice.Entity.StudyPlanEntity">
         UPDATE study_plan
-        SET priority = #{priority},
-            estimated_time = #{estimatedTime},
-            difficulty_level = #{difficultyLevel},
+        SET study_duration = #{studyDuration},
             learning_order = #{learningOrder},
             ai_comment = #{aiComment},
             updated_at = #{updatedAt}
@@ -57,12 +54,12 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO study_plan
-            (user_id, course_id, knowledge_point, priority, estimated_time,
-             difficulty_level, learning_order, ai_comment, created_at, updated_at)
+            (user_id, course_id, knowledge_point, study_duration,
+             learning_order, ai_comment, created_at, updated_at)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.userId}, #{item.courseId}, #{item.knowledgePoint}, #{item.priority}, 
-             #{item.estimatedTime}, #{item.difficultyLevel}, #{item.learningOrder}, 
+            (#{item.userId}, #{item.courseId}, #{item.knowledgePoint}, #{item.studyDuration}, 
+             #{item.learningOrder}, 
              #{item.aiComment}, #{item.createdAt}, #{item.updatedAt})
         </foreach>
     </insert>
