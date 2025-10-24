@@ -9,6 +9,7 @@
         <result column="progress_percentage" property="progressPercentage" />
         <result column="ai_comment" property="aiComment" />
         <result column="last_study_time" property="lastStudyTime" />
+        <result column="knowledge_pic" property="knowledgePic" />
         <result column="status" property="status" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
@@ -38,10 +39,10 @@
     <insert id="insert" parameterType="com.gaodun.learningservice.Entity.UserLearningProgressEntity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_learning_progress (
             user_id, course_id, progress_percentage, ai_comment, 
-            last_study_time, status, create_time, update_time
+            last_study_time, knowledge_pic, status, create_time, update_time
         ) VALUES (
             #{userId}, #{courseId}, #{progressPercentage}, #{aiComment}, 
-            #{lastStudyTime}, #{status}, #{createTime}, #{updateTime}
+            #{lastStudyTime}, #{knowledgePic}, #{status}, #{createTime}, #{updateTime}
         )
     </insert>
     
@@ -53,6 +54,7 @@
             <if test="progressPercentage != null">progress_percentage = #{progressPercentage},</if>
             <if test="aiComment != null">ai_comment = #{aiComment},</if>
             <if test="lastStudyTime != null">last_study_time = #{lastStudyTime},</if>
+            <if test="knowledgePic != null">knowledge_pic = #{knowledgePic},</if>
             <if test="status != null">status = #{status},</if>
             <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>

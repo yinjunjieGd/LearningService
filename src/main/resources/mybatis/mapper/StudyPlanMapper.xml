@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gaodun.learningservice.mapper.StudyPlanMapper">
+
+    <resultMap id="BaseResultMap" type="com.gaodun.learningservice.Entity.StudyPlanEntity">
+        <id column="plan_id" property="planId" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="course_id" property="courseId" jdbcType="INTEGER"/>
+        <result column="knowledge_point" property="knowledgePoint" jdbcType="VARCHAR"/>
+        <result column="priority" property="priority" jdbcType="INTEGER"/>
+        <result column="estimated_time" property="estimatedTime" jdbcType="INTEGER"/>
+        <result column="difficulty_level" property="difficultyLevel" jdbcType="VARCHAR"/>
+        <result column="learning_order" property="learningOrder" jdbcType="INTEGER"/>
+        <result column="ai_comment" property="aiComment" jdbcType="VARCHAR"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="selectByUserIdAndCourseId" resultMap="BaseResultMap">
+        SELECT *
+        FROM study_plan
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+        ORDER BY learning_order ASC
+    </select>
+
+    <select id="selectByUserIdAndCourseIdAndKnowledgePoint" resultMap="BaseResultMap">
+        SELECT *
+        FROM study_plan
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+          AND knowledge_point = #{knowledgePoint}
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.gaodun.learningservice.Entity.StudyPlanEntity"
+            useGeneratedKeys="true" keyProperty="planId">
+        INSERT INTO study_plan
+            (user_id, course_id, knowledge_point, priority, estimated_time, 
+             difficulty_level, learning_order, ai_comment, created_at, updated_at)
+        VALUES
+            (#{userId}, #{courseId}, #{knowledgePoint}, #{priority}, #{estimatedTime},
+             #{difficultyLevel}, #{learningOrder}, #{aiComment}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update" parameterType="com.gaodun.learningservice.Entity.StudyPlanEntity">
+        UPDATE study_plan
+        SET priority = #{priority},
+            estimated_time = #{estimatedTime},
+            difficulty_level = #{difficultyLevel},
+            learning_order = #{learningOrder},
+            ai_comment = #{aiComment},
+            updated_at = #{updatedAt}
+        WHERE plan_id = #{planId}
+    </update>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO study_plan
+            (user_id, course_id, knowledge_point, priority, estimated_time,
+             difficulty_level, learning_order, ai_comment, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.courseId}, #{item.knowledgePoint}, #{item.priority}, 
+             #{item.estimatedTime}, #{item.difficultyLevel}, #{item.learningOrder}, 
+             #{item.aiComment}, #{item.createdAt}, #{item.updatedAt})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByUserIdAndCourseId">
+        DELETE FROM study_plan
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+    </delete>
+
+</mapper>

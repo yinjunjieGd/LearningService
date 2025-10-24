@@ -1,12 +1,14 @@
 package com.gaodun.learningservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gaodun.learningservice.DTO.VolcEngineImageRequest;
 import com.gaodun.learningservice.DTO.VolcEngineResponse;
 import com.gaodun.learningservice.DTO.VolcEngineTextRequest;
 import com.gaodun.learningservice.Entity.AnswerRecordsEntity;
 import com.gaodun.learningservice.Entity.KnowledgePointsEntity;
 import com.gaodun.learningservice.Entity.UserLearningRecordsEntity;
 import com.gaodun.learningservice.Entity.UserLearningProfilesEntity;
+import com.gaodun.learningservice.Entity.UserLearningProgressEntity;
 import com.gaodun.learningservice.config.VolcEngineConfig;
 import com.gaodun.learningservice.manager.AnswerRecordsManager;
 import com.gaodun.learningservice.manager.VolcEngineService;
@@ -14,6 +16,7 @@ import com.gaodun.learningservice.mapper.KnowledgePointsMapper;
 import com.gaodun.learningservice.mapper.QuestionsMapper;
 import com.gaodun.learningservice.mapper.UserLearningRecordsMapper;
 import com.gaodun.learningservice.mapper.UserLearningProfilesMapper;
+import com.gaodun.learningservice.mapper.UserLearningProgressMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -50,6 +53,9 @@ public class AnswerRecordAsyncService {
     
     @Autowired
     private UserLearningProfilesMapper userLearningProfilesMapper;
+    
+    @Autowired
+    private UserLearningProgressMapper userLearningProgressMapper;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     
@@ -196,6 +202,9 @@ public class AnswerRecordAsyncService {
                  if (!masteryData.isEmpty()) {
                      System.out.println("[DEBUG] 准备保存学习画像 - userId: " + userId + ", courseId: " + courseId + ", 知识点数: " + masteryData.size());
                      saveUserLearningProfile(userId, courseId, masteryData);
+                     
+                     // 异步生成知识图谱
+                     generateKnowledgeGraph(userId, courseId);
                  } else {
                      log.warn("没有生成任何掌握度数据 - userId: {}, courseId: {}", userId, courseId);
                      System.out.println("[DEBUG] 学习画像为空，未保存 - userId: " + userId + ", courseId: " + courseId);
@@ -297,6 +306,7 @@ public class AnswerRecordAsyncService {
             
             request.setModel(volcEngineConfig.getTextModelId());
             request.setMessages(messages);
+            log.info(messages.toString());
             request.setTemperature(0.3);
             request.setMaxTokens(100);
             request.setTopP(0.9);
@@ -621,5 +631,189 @@ public class AnswerRecordAsyncService {
         }
         
         return results;
+    }
+    
+    /**
+     * 异步生成知识图谱
+     * 根据用户ID和课程ID查询知识点信息和学习画像，调用火山引擎文生图API生成知识图谱图片
+     */
+    @Async
+    public void generateKnowledgeGraph(Integer userId, Integer courseId) {
+        try {
+            log.info("开始生成知识图谱 - userId: {}, courseId: {}", userId, courseId);
+            
+            // 1. 查询该课程下的所有知识点
+            List<KnowledgePointsEntity> knowledgePoints = knowledgePointsMapper.selectByCourseId(courseId);
+            if (knowledgePoints == null || knowledgePoints.isEmpty()) {
+                log.warn("课程下没有知识点，无法生成知识图谱 - courseId: {}", courseId);
+                return;
+            }
+            
+            // 2. 查询用户学习画像
+            UserLearningProfilesEntity profile = userLearningProfilesMapper.selectByUserIdAndCourseId(userId, courseId);
+            if (profile == null || profile.getMasteryLevel() == null) {
+                log.warn("用户学习画像不存在或掌握度为空，无法生成知识图谱 - userId: {}, courseId: {}", userId, courseId);
+                return;
+            }
+            
+            // 3. 解析掌握度JSON数据
+            Map<String, Map<String, Object>> masteryData = null;
+            try {
+                masteryData = objectMapper.readValue(
+                    profile.getMasteryLevel(), 
+                    new com.fasterxml.jackson.core.type.TypeReference<Map<String, Map<String, Object>>>() {}
+                );
+            } catch (Exception e) {
+                log.error("解析学习画像掌握度JSON失败 - userId: {}, courseId: {}", userId, courseId, e);
+                return;
+            }
+            
+            // 4. 构建知识点层级关系和掌握度信息
+            StringBuilder graphData = new StringBuilder();
+            graphData.append("知识点信息：\n\n");
+            
+            // 构建知识点ID到实体的映射
+            Map<Integer, KnowledgePointsEntity> pointMap = new HashMap<>();
+            for (KnowledgePointsEntity point : knowledgePoints) {
+                pointMap.put(point.getPointId(), point);
+            }
+            
+            // 遍历知识点，构建层级关系和掌握度信息
+            for (KnowledgePointsEntity point : knowledgePoints) {
+                String pointIdStr = String.valueOf(point.getPointId());
+                
+                // 获取掌握度分数
+                double masteryScore = 0.0;
+                String masteryComment = "暂无数据";
+                if (masteryData.containsKey(pointIdStr)) {
+                    Map<String, Object> masteryInfo = masteryData.get(pointIdStr);
+                    if (masteryInfo.containsKey("score")) {
+                        masteryScore = ((Number) masteryInfo.get("score")).doubleValue();
+                    }
+                    if (masteryInfo.containsKey("comment")) {
+                        masteryComment = (String) masteryInfo.get("comment");
+                    }
+                }
+                
+                // 添加知识点基本信息
+                // 将掌握度分数(0-100)转换为百分比格式
+                int masteryPercentage = (int) masteryScore;
+                graphData.append(String.format("知识点：%s\n", point.getTitle()));
+                graphData.append(String.format("掌握度：%d%% (%s)\n", masteryPercentage, masteryComment));
+                
+                // 添加层级关系（前置知识点）
+                if (point.getPrerequisiteId() != null && pointMap.containsKey(point.getPrerequisiteId())) {
+                    KnowledgePointsEntity prerequisite = pointMap.get(point.getPrerequisiteId());
+                    graphData.append(String.format("前置知识点：%s\n", prerequisite.getTitle()));
+                }
+                graphData.append("\n");
+            }
+            
+            // 5. 构建提示词
+            String prompt = buildKnowledgeGraphPrompt(graphData.toString(), knowledgePoints.size());
+            
+            // 6. 调用火山引擎文生图API（使用base64格式，2K分辨率）
+            VolcEngineImageRequest imageRequest = new VolcEngineImageRequest();
+            imageRequest.setPrompt(prompt);
+            imageRequest.setSize("3840x2160");  // 4K分辨率
+            imageRequest.setResponseFormat("b64_json");  // 使用base64格式
+            imageRequest.setN(1);
+            
+            VolcEngineResponse response = volcEngineService.imageGeneration(imageRequest);
+            
+            // 7. 处理生成结果
+            if (response != null && response.getData() != null && !response.getData().isEmpty()) {
+                String base64Image = response.getData().get(0).getB64Json();
+                
+                if (base64Image != null && !base64Image.isEmpty()) {
+                    log.info("知识图谱生成成功 - userId: {}, courseId: {}", userId, courseId);
+                    
+                    // 8. 保存知识图谱到user_learning_progress表
+                    try {
+                        // 查询是否已存在该用户课程的学习进度记录
+                        UserLearningProgressEntity progress = userLearningProgressMapper.selectByUserIdAndCourseId(
+                            userId.longValue(), courseId.longValue());
+                        
+                        if (progress != null) {
+                            // 更新已有记录，只更新knowledge_pic字段
+                            progress.setKnowledgePic(base64Image);
+                            int updateResult = userLearningProgressMapper.update(progress);
+                            if (updateResult > 0) {
+                                log.info("知识图谱已更新到user_learning_progress表 - userId: {}, courseId: {}", userId, courseId);
+                            } else {
+                                log.error("更新知识图谱到user_learning_progress表失败 - userId: {}, courseId: {}", userId, courseId);
+                            }
+                        } else {
+                            // 创建新记录
+                            progress = new UserLearningProgressEntity();
+                            progress.setUserId(userId.longValue());
+                            progress.setCourseId(courseId.longValue());
+                            progress.setKnowledgePic(base64Image);
+                            progress.setProgressPercentage(0);
+                            progress.setStatus(0);
+                            progress.setCreateTime(java.time.LocalDateTime.now());
+                            progress.setUpdateTime(java.time.LocalDateTime.now());
+                            int insertResult = userLearningProgressMapper.insert(progress);
+                            if (insertResult > 0) {
+                                log.info("知识图谱已新增到user_learning_progress表 - userId: {}, courseId: {}", userId, courseId);
+                            } else {
+                                log.error("新增知识图谱到user_learning_progress表失败 - userId: {}, courseId: {}", userId, courseId);
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error("保存知识图谱到数据库失败 - userId: {}, courseId: {}", userId, courseId, e);
+                    }
+                } else {
+                    log.warn("知识图谱生成失败，API返回的base64数据为空 - userId: {}, courseId: {}", userId, courseId);
+                }
+                
+            } else {
+                log.warn("知识图谱生成失败，API未返回图片数据 - userId: {}, courseId: {}", userId, courseId);
+            }
+            
+        } catch (Exception e) {
+            log.error("生成知识图谱失败 - userId: {}, courseId: {}", userId, courseId, e);
+        }
+    }
+    
+    /**
+     * 构建知识图谱生成的提示词
+     */
+    private String buildKnowledgeGraphPrompt(String graphData, int pointCount) {
+        return String.format(
+            "主要提示词：\n"
+            + "生成一幅简约扁平化设计、科技感线条图、手绘学术风的知识图谱，展示知识点的层级关系，用颜色体现掌握度。\n\n"
+            + "知识点数据：\n%s\n\n"
+            + "视觉要求：\n"
+            + "1. 节点样式：\n"
+            + "   - 每个知识点用圆形或六边形节点表示\n"
+            + "   - 节点之间用线条连接，体现层级和依赖关系\n"
+            + "   - 采用简约扁平化设计风格\n\n"
+            + "2. 掌握度视觉表现（按颜色体系）：\n"
+            + "   - 80-100%%：深绿色节点 (#4CAF50)\n"
+            + "   - 60-80%%：蓝色节点 (#2196F3)\n"
+            + "   - 40-60%%：黄色节点 (#FFC107)\n"
+            + "   - 20-40%%：橙色节点 (#FF9800)\n"
+            + "   - 0-20%%：红色节点 (#F44336)\n\n"
+            + "3. 布局要求：\n"
+            + "   - 树状或放射状层级结构\n"
+            + "   - 主题在中心或顶部\n"
+            + "   - 层级关系清晰\n"
+            + "   - 节点分布均匀\n\n"
+            + "4. 视觉细节：\n"
+            + "   - 4K超高清分辨率（3840x2160）\n"
+            + "   - 科技感线条，简洁流畅\n"
+            + "   - 背景纯净（白色或浅灰）\n"
+            + "   - 节点内只显示知识点名称\n"
+            + "   - 所有文字清晰可读，无乱码\n\n"
+            + "知识点总数：%d个\n\n"
+            + "负面提示词（避免以下问题）：\n"
+            + "文字、数字标注、百分比文字、标签文字、说明文字、统计数据、\n"
+            + "模糊、低分辨率、扭曲、变形、断裂线条、杂乱布局、\n"
+            + "过度装饰、立体效果、阴影、渐变、3D效果、\n"
+            + "乱码、无关元素、logo、水印、边框装饰。",
+            graphData,
+            pointCount
+        );
     }
 }

@@ -111,7 +111,11 @@ public class VolcEngineResponse {
     
     public static class ImageData {
         private String url;
+        
+        @JsonProperty("b64_json")
         private String b64Json;
+        
+        private String size;
         
         public String getUrl() {
             return url;
@@ -127,6 +131,14 @@ public class VolcEngineResponse {
         
         public void setB64Json(String b64Json) {
             this.b64Json = b64Json;
+        }
+        
+        public String getSize() {
+            return size;
+        }
+        
+        public void setSize(String size) {
+            this.size = size;
         }
     }
     

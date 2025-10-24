@@ -183,4 +183,56 @@ public class AnswerRecordAsyncServiceTest {
         
         System.out.println("=========================================\n");
     }
+    
+    /**
+     * 测试知识图谱生成功能
+     * 根据现有学习画像数据生成知识图谱并输出base64编码
+     */
+    @Test
+    public void testGenerateKnowledgeGraph() throws InterruptedException {
+        System.out.println("\n========== 测试知识图谱生成 ==========");
+        
+        // 1. 查询现有的学习画像
+        List<UserLearningProfilesEntity> allProfiles = userLearningProfilesMapper.selectAll();
+        
+        if (allProfiles == null || allProfiles.isEmpty()) {
+            System.out.println("⚠ 警告: 数据库中没有学习画像数据，跳过测试");
+            System.out.println("建议: 先运行 testAnswerRecordProcessing() 生成学习画像数据");
+            return;
+        }
+        
+        // 使用第一条学习画像数据进行测试
+        UserLearningProfilesEntity profile = allProfiles.get(0);
+        Integer userId = profile.getUserId();
+        Integer courseId = profile.getCourseId();
+        
+        System.out.println("使用测试数据:");
+        System.out.println("  - 用户ID: " + userId);
+        System.out.println("  - 课程ID: " + courseId);
+        System.out.println("  - 掌握度数据长度: " + 
+            (profile.getMasteryLevel() != null ? profile.getMasteryLevel().length() : 0) + " 字符");
+        
+        // 2. 触发知识图谱生成
+        System.out.println("\n触发知识图谱生成...");
+        answerRecordAsyncService.generateKnowledgeGraph(userId, courseId);
+        
+        // 3. 等待异步处理完成（图片生成需要时间）
+        System.out.println("等待知识图谱生成完成（60秒）...");
+        for (int i = 1; i <= 60; i++) {
+            Thread.sleep(1000);
+            if (i % 5 == 0) {
+                System.out.println("已等待 " + i + " 秒...");
+            }
+        }
+        
+        System.out.println("\n✓ 知识图谱生成请求已发送");
+        System.out.println("\n注意:");
+        System.out.println("  1. 实际的图片生成是异步进行的");
+        System.out.println("  2. 图片的base64编码会输出到应用日志中");
+        System.out.println("  3. 请查看应用日志中以 \"知识图谱生成成功\" 开头的日志信息");
+        System.out.println("  4. 日志中会包含完整的base64编码图片数据");
+        System.out.println("  5. 您可以将base64编码复制到在线工具查看图片: https://base64.guru/converter/decode/image");
+        
+        System.out.println("=========================================\n");
+    }
 }

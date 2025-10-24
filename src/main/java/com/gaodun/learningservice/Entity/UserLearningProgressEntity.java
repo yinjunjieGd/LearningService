@@ -38,6 +38,9 @@ public class UserLearningProgressEntity {
     @Column(name = "status")
     private Integer status = 0;
     
+    @Column(name = "knowledge_pic", columnDefinition = "longtext")
+    private String knowledgePic;
+    
     @Column(name = "create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
