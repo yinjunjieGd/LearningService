@@ -107,13 +107,13 @@ public class StudyPlanController {
      */
     @PostMapping("/knowledge-pic")
     public ResponseEntity<?> getKnowledgePic(
-            @RequestParam("userId") Long userId,
-            @RequestParam("courseId") Long courseId) {
+            @RequestParam("userId") Integer userId,
+            @RequestParam("courseId") Integer courseId) {
         
         log.info("查询知识图谱图片: userId={}, courseId={}", userId, courseId);
         
         try {
-            UserLearningProgressEntity progress = userLearningProgressManager.selectByUserIdAndCourseId(userId, courseId);
+            UserLearningProgressEntity progress = userLearningProgressManager.selectByUserIdAndCourseId(Long.valueOf(userId), Long.valueOf(courseId));
             
             if (progress == null) {
                 Map<String, Object> errorResponse = new HashMap<>();

@@ -12,7 +12,7 @@ import java.util.Map;
  */
 @Data
 @Entity
-@Table(name = "user_learning_profiles")
+@Table(name = "user_learning_profiles", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "course_id"}))
 public class UserLearningProfilesEntity {
     
     @Id
@@ -20,7 +20,7 @@ public class UserLearningProfilesEntity {
     @Column(name = "profile_id")
     private Integer profileId;
     
-    @Column(name = "user_id", nullable = false, unique = true)
+    @Column(name = "user_id", nullable = false)
     private Integer userId;
     
     @Column(name = "course_id", nullable = false)

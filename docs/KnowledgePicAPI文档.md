@@ -12,6 +12,8 @@
 
 ## 请求参数
 
+请求参数通过请求体（Body）以JSON格式传递：
+
 | 参数名 | 类型 | 是否必选 | 描述 | 示例值 |
 |-------|------|----------|------|--------|
 | userId | Long | 是 | 用户ID | 1001 |
@@ -20,7 +22,13 @@
 ## 请求示例
 
 ```
-POST /api/study-plan/knowledge-pic?userId=1001&courseId=2001
+POST /api/study-plan/knowledge-pic
+Content-Type: application/json
+
+{
+  "userId": 1001,
+  "courseId": 2001
+}
 ```
 
 ## 响应参数
@@ -82,7 +90,8 @@ POST /api/study-plan/knowledge-pic?userId=1001&courseId=2001
 
 ## 注意事项
 
-1. 接口使用POST方法，参数通过URL参数传递
+1. 接口使用POST方法，参数通过请求体以JSON格式传递
 2. `knowledge_pic`字段存储的是长文本类型数据，通常为Base64编码的图片或图片URL
 3. 在调用接口前，请确保用户ID和课程ID正确，并且存在对应的学习进度记录
 4. 如果需要展示图片，请根据`data`字段的格式进行相应的解码或展示处理
+5. 修改参数传递方式为请求体，避免了URL长度限制问题，适用于各种部署环境
