@@ -1,7 +1,9 @@
 package com.gaodun.learningservice.controller;
 
 import com.gaodun.learningservice.Entity.StudyPlanEntity;
+import com.gaodun.learningservice.Entity.UserLearningProgressEntity;
 import com.gaodun.learningservice.manager.StudyPlanManager;
+import com.gaodun.learningservice.manager.UserLearningProgressManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,9 @@ public class StudyPlanController {
     
     @Autowired
     private StudyPlanManager studyPlanManager;
+    
+    @Autowired
+    private UserLearningProgressManager userLearningProgressManager;
     
     /**
      * 生成学习计划
@@ -89,6 +94,54 @@ public class StudyPlanController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("message", "查询学习计划失败: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    /**
+     * 获取知识图谱图片
+     * @param userId 用户ID
+     * @param courseId 课程ID
+     * @return 知识图谱图片数据
+     */
+    @PostMapping("/knowledge-pic")
+    public ResponseEntity<?> getKnowledgePic(
+            @RequestParam("userId") Long userId,
+            @RequestParam("courseId") Long courseId) {
+        
+        log.info("查询知识图谱图片: userId={}, courseId={}", userId, courseId);
+        
+        try {
+            UserLearningProgressEntity progress = userLearningProgressManager.selectByUserIdAndCourseId(userId, courseId);
+            
+            if (progress == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "未找到对应用户的学习进度数据");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            
+            if (progress.getKnowledgePic() == null || progress.getKnowledgePic().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "知识图谱图片数据不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "知识图谱图片获取成功");
+            response.put("data", progress.getKnowledgePic());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("获取知识图谱图片失败", e);
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "获取知识图谱图片失败: " + e.getMessage());
             
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
