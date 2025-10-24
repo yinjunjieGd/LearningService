@@ -140,6 +140,8 @@ public class StudyPlanController {
     public ResponseEntity<?> queryStudyPlan(
             @RequestParam("userId") Integer userId,
             @RequestParam("courseId") Integer courseId) {
+        // 注意：虽然使用了POST请求，但为了保持兼容性，这里仍然使用@RequestParam接收参数
+        // 建议后续优化为使用@RequestBody接收请求体参数
         
         log.info("学习计划查询请求: userId={}, courseId={}", userId, courseId);
         
